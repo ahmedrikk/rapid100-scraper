@@ -1,0 +1,11 @@
+# Rapid100 - Gaming News Scraper Requirements
+requests>=2.28.0
+flask>=2.3.0
+flask-cors>=4.0.0
+
+# Optional: Better article extraction (recommended)
+# newspaper3k>=0.2.8
+# lxml_html_clean>=0.1.0  # Required for newspaper3k
+
+# Optional: For production deployment
+gunicorn>=21.0.0

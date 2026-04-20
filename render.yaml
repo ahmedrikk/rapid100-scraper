@@ -1,0 +1,47 @@
+services:
+  # ── Web service: REST API for health check + on-demand scrapes ─────────────
+  - type: web
+    name: rapid100-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn api:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false          # Set in Render dashboard: Settings → Environment
+      - key: GEMINI_API_KEY
+        sync: false          # Optional — if you want Gemini as AI fallback
+      - key: SUPABASE_URL
+        sync: false          # e.g. https://zxcqqsviwtwxukizibef.supabase.co
+      - key: SUPABASE_ANON_KEY
+        sync: false          # Supabase anon key (for reads)
+      - key: SUPABASE_SERVICE_KEY
+        sync: false          # Supabase service_role key (for writes to cached_articles)
+      - key: AI_PROVIDER
+        value: groq          # Options: groq | gemini | auto
+      - key: ARTICLE_DELAY
+        value: "8"           # seconds between articles (Groq rate limit buffer)
+      - key: RAPID100_DB
+        value: /tmp/rapid100.db
+
+  # ── Cron job: runs every 2 hours, fetches + summarises new articles ─────────
+  - type: cron
+    name: rapid100-cron
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    schedule: "0 */2 * * *"   # Every 2 hours (on the hour)
+    startCommand: python cli.py --provider groq scrape --max-per-feed 5 --article-delay 8
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: AI_PROVIDER
+        value: groq
+      - key: RAPID100_DB
+        value: /tmp/rapid100.db
