@@ -42,10 +42,9 @@ jobs:
         run: |
           MAX_PER_FEED="${{ github.event.inputs.max_per_feed || '5' }}"
           echo "🚀 Starting scrape — max $MAX_PER_FEED articles per feed"
-          python cli.py --provider groq scrape \
-            --max-per-feed "$MAX_PER_FEED" \
-            --article-delay 8 \
-            --db /tmp/rapid100.db
+          python cli.py --provider groq --db /tmp/rapid100.db scrape \
+            --max-per-feed 5 \
+            --article-delay 8
 
       - name: Log completion
         if: always()
