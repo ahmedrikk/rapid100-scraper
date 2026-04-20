@@ -1,0 +1,49 @@
+name: Scrape Gaming News
+
+on:
+  # Run every 2 hours
+  schedule:
+    - cron: '0 */2 * * *'
+  # Allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
+    inputs:
+      max_per_feed:
+        description: 'Max articles per feed'
+        required: false
+        default: '5'
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scraper
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          RAPID100_DB: /tmp/rapid100.db
+        run: |
+          MAX_PER_FEED="${{ github.event.inputs.max_per_feed || '5' }}"
+          echo "🚀 Starting scrape — max $MAX_PER_FEED articles per feed"
+          python cli.py --provider groq scrape \
+            --max-per-feed "$MAX_PER_FEED" \
+            --article-delay 8 \
+            --db /tmp/rapid100.db
+
+      - name: Log completion
+        if: always()
+        run: echo "✅ Scrape job finished at $(date -u)"
