@@ -1,6 +1,9 @@
 name: Scrape Gaming News
 
 on:
+  # Run on push to main
+  push:
+    branches: [ main ]
   # Run every 2 hours
   schedule:
     - cron: '0 */2 * * *'
