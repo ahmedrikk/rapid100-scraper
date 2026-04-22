@@ -385,7 +385,7 @@ class AISummarizer:
         """
         self.api_key = api_key or os.getenv('GROQ_API_KEY')
         self.gemini_key = gemini_key or os.getenv('GEMINI_API_KEY')
-        self.provider = provider
+        self.provider = provider or 'auto'
         self.ollama_models = ollama_models or self.OLLAMA_MODELS
         
         # Check Ollama availability
@@ -958,7 +958,7 @@ class Rapid100Scraper:
         self.article_scraper = ArticleScraper()
         self._groq_api_key = groq_api_key
         self._gemini_key = gemini_key
-        self._ai_provider = ai_provider
+        self._ai_provider = ai_provider or 'auto'
         self._ai = None  # Lazy initialization
         self.db = PersonalizationEngine(db_path)
 
