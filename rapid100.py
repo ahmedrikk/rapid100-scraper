@@ -1055,6 +1055,24 @@ class Rapid100Scraper:
             reason = "PC Gamer RSS truncated" if source == 'PCGamer' and rss_word_count >= 50 else f"RSS too short ({rss_word_count}w)"
             print(f"   🔍 {reason}, scraping full article...")
             scraped = self.article_scraper.scrape(item['link'], max_words=600)
+
+            # If direct scrape failed or returned too little, try Jina AI Reader
+            if not scraped or len(scraped.split()) < 50:
+                try:
+                    jina_url = f"https://r.jina.ai/{item['link']}"
+                    jina_resp = requests.get(
+                        jina_url,
+                        headers={"Accept": "text/plain", "User-Agent": "Rapid100Bot/1.0"},
+                        timeout=20,
+                    )
+                    if jina_resp.ok and jina_resp.text.strip():
+                        jina_text = self.article_scraper._truncate_text(jina_resp.text, max_words=600)
+                        if len(jina_text.split()) > (len(scraped.split()) if scraped else 0):
+                            print(f"   ✓ Jina fallback: {len(jina_text.split())} words")
+                            scraped = jina_text
+                except Exception as e:
+                    print(f"   ⚠ Jina fallback failed: {e}")
+
             content = scraped or rss_desc
         else:
             # Truncate RSS description if too long
