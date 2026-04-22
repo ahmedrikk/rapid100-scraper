@@ -925,7 +925,7 @@ class SupabaseWriter:
             "summary": article.summary_100w,
             "ai_summary": article.summary_100w,
             "source_url": article.source_url,
-            "image_url": article.image_url or "",
+            "image_url": article.image_url or None,
             "og_image_url": None,
             "category": "Gaming",
             "source": article.source,
